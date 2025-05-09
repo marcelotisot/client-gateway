@@ -11,10 +11,11 @@ import {
   Query 
 } from '@nestjs/common';
 
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { PaginationDto } from '../../common';
 import { NATS_SERVICE } from '../../config';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('categories')
 export class CategoriesController {
@@ -36,8 +37,16 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.client.send('find-one-category', {id});
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      const category = await firstValueFrom(
+        this.client.send('find-one-category', {id})
+      );
+
+      return category;
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @Patch(':id')

@@ -11,10 +11,11 @@ import {
   ParseUUIDPipe 
 } from '@nestjs/common';
 
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import { PaginationDto } from '../../common';
 import { NATS_SERVICE } from '../../config';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('products')
 export class ProductsController {
@@ -35,8 +36,16 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.client.send('find-one-product', {id});
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      const product = await firstValueFrom(
+        this.client.send('find-one-product', {id})
+      );
+
+      return product;
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @Patch(':id')
