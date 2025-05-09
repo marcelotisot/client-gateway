@@ -13,7 +13,7 @@ import {
 
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
-import { PaginationDto } from '../../common/dto/paginatio.dto';
+import { PaginationDto } from '../../common';
 import { NATS_SERVICE } from '../../config';
 
 @Controller('categories')

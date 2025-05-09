@@ -13,7 +13,7 @@ import {
 
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateProductDto, UpdateProductDto } from './dto';
-import { PaginationDto } from '../../common/dto/paginatio.dto';
+import { PaginationDto } from '../../common';
 import { NATS_SERVICE } from '../../config';
 
 @Controller('products')
