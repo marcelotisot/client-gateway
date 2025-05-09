@@ -6,7 +6,8 @@ import {
   Param, 
   Inject, 
   ParseUUIDPipe, 
-  Query 
+  Query, 
+  Patch
 } from '@nestjs/common';
 
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -53,6 +54,25 @@ export class OrdersController {
     try {
       const order = await firstValueFrom(
         this.client.send('find-one-order', {id})
+      );
+
+      return order;
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  @Patch(':id')
+  async changeStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() statusDto: StatusDto
+  ) {
+    try {
+      const order = await firstValueFrom(
+        this.client.send('change-order-status', {
+          id,
+          status: statusDto.status
+        })
       );
 
       return order;
