@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, ParseUUIDPipe } from '@nestjs/common';
-import { CreateOrderDto } from './dto';
-import { NATS_SERVICE } from 'src/config';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Param, 
+  Inject, 
+  ParseUUIDPipe, 
+  Query 
+} from '@nestjs/common';
+
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
+import { PaginationDto } from '../../common';
+import { NATS_SERVICE } from 'src/config';
+import { firstValueFrom } from 'rxjs'
 
 @Controller('orders')
 export class OrdersController {
@@ -17,12 +28,27 @@ export class OrdersController {
     return this.client.send('create-order', createOrderDto);
   }
 
-  /*@Get()
-  findAll() {
-    return this.ordersService.findAll();
-  }*/
+  @Get()
+  findAll(@Query() orderPaginationDto: OrderPaginationDto) {
+    return this.client.send('find-all-orders', orderPaginationDto);
+  }
 
-  @Get(':id')
+   @Get(':status')
+  async findAllByStatus(
+    @Param() statusDto: StatusDto,
+    @Query() paginationDto: PaginationDto
+  ) {
+    try {
+      return this.client.send('find-all-orders', {
+        ...paginationDto,
+        status: statusDto.status,
+      });
+    } catch (error) {
+      throw new RpcException(error);
+    }
+  }
+
+  @Get('id/:id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
       const order = await firstValueFrom(
