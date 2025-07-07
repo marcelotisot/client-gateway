@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { RpcCustomExceptionFilter } from './common';
 import { AppModule } from './app.module';
 import { envs } from './config';
 
@@ -20,6 +21,9 @@ async function bootstrap() {
       }
     })
   );
+
+  // Registro global de filtros
+  app.useGlobalFilters(new RpcCustomExceptionFilter());
 
   await app.listen(envs.port);
 
