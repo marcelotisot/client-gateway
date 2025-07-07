@@ -1,12 +1,24 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { NATS_SERVICE } from '../../config/services';
+import { 
+  Body, 
+  Controller, 
+  Get, 
+  Inject, 
+  Post, 
+  UseGuards 
+} from '@nestjs/common';
+
 import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { NATS_SERVICE } from '../../config/services';
 import { CreateUserDto } from '../users/dto';
 import { LoginUserDto } from './dto';
 import { catchError } from 'rxjs';
+import { AuthGuard } from './guards/auth.guard';
+import { Token, User } from './decorators';
+import { CurrentUser } from './interfaces/current-user.interface';
 
 @Controller('auth')
 export class AuthController {
+  
   constructor(
     @Inject(NATS_SERVICE) private readonly natsClient: ClientProxy
   ) {}
@@ -32,4 +44,16 @@ export class AuthController {
     );
     
   }
+
+  @UseGuards(AuthGuard)
+  @Get('verify')
+  verifyToken(
+    @User() user: CurrentUser, // Extraer user
+    @Token() token: string, // Extraer token
+  ) {
+
+    return { user, token };
+
+  }
+
 }
