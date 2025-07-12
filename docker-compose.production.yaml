@@ -1,0 +1,12 @@
+services:
+  client-gateway:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: client-gateway-docker 
+    container_name: client-gateway
+    restart: always # reiniciar el contenedor si se detiene
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
